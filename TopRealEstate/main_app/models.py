@@ -41,7 +41,7 @@ class Advert(models.Model):
                                             null=True,
                                             default='The owner did not indicate the house number',
                                             )
-    price = models.DecimalField(max_digits=5,
+    price = models.DecimalField(max_digits=20,
                                 decimal_places=2,
                                 verbose_name='Цена',
                                 help_text='Напишите цену, за месяц аренды',
@@ -77,9 +77,8 @@ class Advert(models.Model):
                                     help_text='Выберите, активно объявление или нет',
                                     )
     class Meta():
-        db_table = 'Объявления'
         ordering = ['title']
-        verbose_name='Объявление'
-        verbose_name_plural = 'Объявления'
+        verbose_name = 'Advert'
+        verbose_name_plural = 'Adverts'
     def __str__(self):
         return f"{self.title}"
