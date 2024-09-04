@@ -2,28 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class CategoryOfRealEstate(models.Model):
-    name = models.CharField(max_length=100,
-                            verbose_name='Категория жилья',
-                            help_text='Создайте категорию жилья, т.е. квартира или частный дом',
-                            unique=True,
-                            blank=False,
-                            null=False,
-                            )
-    slug = models.SlugField(max_length=100,
-                            verbose_name="URL",
-                            help_text="Укажите URL-слаг",
-                            unique=True,
-                            blank=False,
-                            null=False,)
-    class Meta():
-        db_table = 'Категория жилья'
-        verbose_name='Категорию жилья'
-        verbose_name_plural='Категории жилья'
-    def __str__(self):
-        return f"{self.name}"
-
-
 class Advert(models.Model):
     title = models.CharField(max_length=200,
                              verbose_name='Заголовок обьявления',
@@ -77,15 +55,14 @@ class Advert(models.Model):
                                                   blank=False,
                                                   default=1,
                                                   )
-    type = models.ForeignKey(CategoryOfRealEstate,
-                                            verbose_name='',
-                                            help_text='',
-                                            on_delete=models.SET_NULL,
-                                            related_name='type',
-                                            null=True,
-                                            blank=False,
-                                            default='Flat',
-                             )
+    types = [('Flat', 'Flat'), ('House', 'House')]
+    type = models.CharField(max_length=100,
+                            choices=types,
+                            verbose_name='Квартира или частный дом',
+                            help_text='Укажите тип жилья, квартира или частный дом',
+                            blank=False,
+                            null=True,
+                            default='Flat',)
     created_or_updated_date = models.DateTimeField(auto_now=True,)
     owner = models.ForeignKey(User,
                               verbose_name='Пользователь',
