@@ -3,17 +3,11 @@ from environ import Env
 
 
 env = Env()
-
-
+Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
+env.read_env(BASE_DIR / '.env')
 SECRET_KEY = env.str("SECRET_KEY")
-
-
 DEBUG = True
-
-
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 
@@ -24,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'main_app',
 ]
 
 MIDDLEWARE = [
