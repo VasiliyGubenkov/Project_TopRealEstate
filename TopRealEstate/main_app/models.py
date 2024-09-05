@@ -76,6 +76,12 @@ class Advert(models.Model):
                                     verbose_name='Активность обьявления',
                                     help_text='Выберите, активно объявление или нет',
                                     )
+    image = models.ImageField(upload_to="foto/%Y/%m/%d/",
+                              verbose_name="Фото недвижимости",
+                              help_text="Загрузите сюда ссылку на изображение с недвижимостью",
+                              blank=True,
+                              null=True,
+                              )
     class Meta():
         ordering = ['title']
         verbose_name = 'Advert'
