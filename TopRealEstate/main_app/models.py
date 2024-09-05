@@ -71,6 +71,7 @@ class Advert(models.Model):
                               related_name='owner',
                               null=True,
                               blank=False,
+                              default=1,
                               )
     is_active = models.BooleanField(default=True,
                                     verbose_name='Активность обьявления',
