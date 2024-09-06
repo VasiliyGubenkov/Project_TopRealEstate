@@ -89,3 +89,6 @@ class Advert(models.Model):
         verbose_name_plural = 'Adverts'
     def __str__(self):
         return f"{self.title}"
+
+
+#alex = User.objects.create_user(username='alex', password='87654321', email='v.gubenkov@gmail.com')
