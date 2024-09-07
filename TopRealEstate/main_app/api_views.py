@@ -41,7 +41,7 @@ class UserRegistrationView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#{"username": "newuser", "email": "newuser@example.com", "password": "password123", "password_confirm": "password123"}
+#пример запроса: {"username": "newuser", "email": "newuser@example.com", "password": "password123", "password_confirm": "password123"}
 
 
 class LoginAPIView(APIView):
@@ -66,7 +66,7 @@ class LoginAPIView(APIView):
             }, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-#{"username": "your_username", "password": "your_password"}
+#пример запроса: {"username": "your_username", "password": "your_password"}
 
 
 
@@ -77,3 +77,4 @@ class LogoutAPIView(APIView):
             return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'You are not logged in'}, status=status.HTTP_400_BAD_REQUEST)
+#отправляем ПУСТОЙ пост-запрос
