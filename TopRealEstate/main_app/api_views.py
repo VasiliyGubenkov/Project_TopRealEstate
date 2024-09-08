@@ -11,17 +11,18 @@ from rest_framework.views import APIView
 from .serializers import UserRegistrationSerializer
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
+from .filters import AdvertFilter
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
     queryset = Advert.objects.all()
     serializer_class = AdvertSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['id', 'title', 'description', 'address_city_name', 'address_street_name',
-                        'address_house_number', 'price', 'number_of_rooms', 'type', 'owner', 'is_active']
+    filterset_class = AdvertFilter
     ordering_fields = '__all__'
     ordering = ['title']
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
@@ -29,8 +30,15 @@ class AdvertViewSet(viewsets.ModelViewSet):
 class UserAdvertViewSet(viewsets.ModelViewSet):
     serializer_class = AdvertSerializer
     permission_classes = [IsAuthenticated]
+
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = AdvertFilter
+    ordering_fields = '__all__'
+    ordering = ['title']
+
     def get_queryset(self):
         return Advert.objects.filter(owner=self.request.user)
+
 
 
 

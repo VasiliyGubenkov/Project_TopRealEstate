@@ -6,14 +6,15 @@ from .api_views import LoginAPIView, LogoutAPIView
 
 router = DefaultRouter()
 router.register('adverts', api_views.AdvertViewSet, basename='adverts')
+router.register('myadverts', api_views.UserAdvertViewSet, basename='myadverts')
 app_name = 'main_app'
 
 
 urlpatterns = [
     path('', html_views.start, name='start'),
     path('registration/', api_views.UserRegistrationView.as_view(), name='user-registration'),
-    path('api/login/', LoginAPIView.as_view(), name='api-login'),
-    path('api/logout/', LogoutAPIView.as_view(), name='api-logout'),
+    path('login/', LoginAPIView.as_view(), name='api-login'),
+    path('logout/', LogoutAPIView.as_view(), name='api-logout'),
     path('api/', include(router.urls)),
 ]
 
