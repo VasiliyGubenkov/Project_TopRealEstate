@@ -68,9 +68,7 @@ class LoginAPIView(APIView):
 
         if user is not None:
             login(request, user)
-
             csrf_token = get_token(request)
-
             return Response({
                 'message': 'Login successful',
                 'username': user.username,
