@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from .models import Advert
 from django.contrib.auth.models import User
 from .models import Advert, Rating
 
@@ -35,6 +34,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = ['advert', 'owner', 'rating', 'review', 'created_at', 'updated_at']
-        read_only_fields = ['owner', 'created_at', 'updated_at']
+        fields = ['advert', 'owner', 'rating', 'review', 'updated_at']
+        read_only_fields = ['owner', 'updated_at']
+
+    def save(self, **kwargs):
+        instance = super().save(**kwargs)
+        instance.advert.update_average_rating()
+        return instance
+
 

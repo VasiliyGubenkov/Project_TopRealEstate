@@ -15,6 +15,7 @@ from .filters import AdvertFilter
 from .models import Rating
 from .serializers import RatingSerializer
 from .filters import RatingFilter
+from rest_framework.decorators import action
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
@@ -102,3 +103,35 @@ class RatingViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class UserRatingViewSet(viewsets.ModelViewSet):
+    serializer_class = RatingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Rating.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    @action(detail=False, methods=['get'], url_path='myratings')
+    def list_user_ratings(self, request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+#Когда пользователь захочет отредактировать свой отзыв, ему нужно будет через слэш написать цифру обьявления, а не айди.
+#Это логично, т.к. человек не может иметь два разных мнения по-поводу одной квартиры. Один обьект- один отзыв.
