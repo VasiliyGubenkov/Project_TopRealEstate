@@ -1,8 +1,6 @@
 import django_filters
 from .models import Advert
-
-import django_filters
-from .models import Advert
+from .models import Rating
 
 
 class AdvertFilter(django_filters.FilterSet):
@@ -21,3 +19,14 @@ class AdvertFilter(django_filters.FilterSet):
                   'address_house_number', 'price', 'number_of_rooms', 'type', 'owner', 'is_active']
 
 #/api/adverts/?price_min=1000&price_max=5000
+
+
+
+class RatingFilter(django_filters.FilterSet):
+    created_at = django_filters.DateFromToRangeFilter(field_name='created_at', label="Дата создания (от и до)")
+    advert_title = django_filters.CharFilter(field_name='advert__title', lookup_expr='icontains', label="Заголовок объявления")
+    review = django_filters.CharFilter(field_name='review', lookup_expr='icontains', label="Отзыв (по ключевым словам)")
+
+    class Meta:
+        model = Rating
+        fields = ['advert', 'rating', 'created_at', 'advert_title', 'review']

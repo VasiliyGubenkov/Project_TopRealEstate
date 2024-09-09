@@ -14,6 +14,7 @@ from django.middleware.csrf import get_token
 from .filters import AdvertFilter
 from .models import Rating
 from .serializers import RatingSerializer
+from .filters import RatingFilter
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
@@ -94,6 +95,10 @@ class RatingViewSet(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = RatingFilter
+    ordering_fields = '__all__'
+    ordering = ['created_at']
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

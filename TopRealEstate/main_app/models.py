@@ -103,6 +103,11 @@ class Advert(models.Model):
 #alex = User.objects.create_user(username='alex', password='87654321', email='v.gubenkov@gmail.com')
 
 
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+
+
 class Rating(models.Model):
     advert = models.ForeignKey(Advert,
                                verbose_name="Объявление",
@@ -129,3 +134,21 @@ class Rating(models.Model):
                                          default=10,
                                          blank=False,
                                          )
+    review = models.TextField(verbose_name="Отзыв",
+                              help_text="Напишите ваш отзыв о недвижимости",
+                              null=True,
+                              blank=False,
+                              default="Пользователь не оставил отзыва",
+                              )
+    updated_at = models.DateTimeField(auto_now=True,
+                                      verbose_name="Дата обновления",
+                                      help_text='Поле будет заполнено автоматически'
+                                      )
+
+    class Meta:
+        ordering = ['-updated_at']
+        verbose_name = 'Rating'
+        verbose_name_plural = 'Ratings'
+
+    def __str__(self):
+        return f"Rating {self.rating} for {self.advert.title}"

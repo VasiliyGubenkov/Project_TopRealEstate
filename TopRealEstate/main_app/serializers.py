@@ -35,5 +35,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
-        fields = ['advert', 'owner', 'rating']
+        fields = ['advert', 'owner', 'rating', 'review', 'created_at', 'updated_at']
+        read_only_fields = ['owner', 'created_at', 'updated_at']
 
