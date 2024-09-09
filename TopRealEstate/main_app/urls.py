@@ -7,6 +7,7 @@ from .api_views import LoginAPIView, LogoutAPIView
 router = DefaultRouter()
 router.register('adverts', api_views.AdvertViewSet, basename='adverts')
 router.register('myadverts', api_views.UserAdvertViewSet, basename='myadverts')
+router.register('ratings', api_views.RatingViewSet, basename='ratings')
 app_name = 'main_app'
 
 

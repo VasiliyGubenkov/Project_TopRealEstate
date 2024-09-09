@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from .models import Advert
 from django.contrib.auth.models import User
+from .models import Advert, Rating
 
 
 class AdvertSerializer(serializers.ModelSerializer):
+    average_rating = serializers.FloatField(read_only=True)
     class Meta:
         model = Advert
         fields = '__all__'
@@ -29,4 +31,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         return user
 
+
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ['advert', 'owner', 'rating']
 

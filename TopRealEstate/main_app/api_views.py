@@ -12,6 +12,8 @@ from .serializers import UserRegistrationSerializer
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from .filters import AdvertFilter
+from .models import Rating
+from .serializers import RatingSerializer
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
@@ -86,3 +88,12 @@ class LogoutAPIView(APIView):
         else:
             return Response({'error': 'You are not logged in'}, status=status.HTTP_400_BAD_REQUEST)
 #отправляем ПУСТОЙ пост-запрос
+
+
+class RatingViewSet(viewsets.ModelViewSet):
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)

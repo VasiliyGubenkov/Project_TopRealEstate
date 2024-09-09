@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Avg
 
 
 class Advert(models.Model):
@@ -68,7 +69,7 @@ class Advert(models.Model):
                               verbose_name='Пользователь',
                               help_text='Выберите пользователя, создающего объявление',
                               on_delete=models.CASCADE,
-                              related_name='owner',
+                              related_name='adverts',
                               null=True,
                               blank=False,
                               default=1,
@@ -83,12 +84,48 @@ class Advert(models.Model):
                               blank=True,
                               null=True,
                               )
+    average_rating = models.FloatField(default=0.0,
+                                       verbose_name="Средний рейтинг",
+                                       help_text="Здесь будет автоматически посчитан средний рейтинг, на основании отзывов пользователей",
+                                       blank=True)
+
+    def update_average_rating(self):
+        avg_rating = self.ratings.aggregate(Avg('rating'))['rating__avg']
+        self.average_rating = avg_rating if avg_rating else 0.0
+        self.save()
+
     class Meta():
         ordering = ['title']
         verbose_name = 'Advert'
         verbose_name_plural = 'Adverts'
     def __str__(self):
         return f"{self.title}"
-
-
 #alex = User.objects.create_user(username='alex', password='87654321', email='v.gubenkov@gmail.com')
+
+
+class Rating(models.Model):
+    advert = models.ForeignKey(Advert,
+                               verbose_name="Объявление",
+                               help_text="Выберите обьявление, к которому хотите оставить отзыв",
+                               on_delete=models.CASCADE,
+                               related_name='ratings',
+                               null=False,
+                               blank=True,
+                               )
+    owner = models.ForeignKey(User,
+                              verbose_name='Пользователь',
+                              help_text='Выберите пользователя, создающего отзыв',
+                              on_delete=models.SET_NULL,
+                              related_name='ratings',
+                              null=True,
+                              blank=False,
+                              default=1,
+                              )
+    numbers = [(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10)]
+    rating = models.PositiveIntegerField(choices=numbers,
+                                         verbose_name="Рейтинг",
+                                         help_text="Поставьте рейтинг по шкале от 1 до 10, где 10 максимальная оценка",
+                                         null=True,
+                                         default=10,
+                                         blank=False,
+                                         )
