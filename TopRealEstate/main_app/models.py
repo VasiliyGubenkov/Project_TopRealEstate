@@ -163,7 +163,8 @@ class AdvertDates(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        self.update_dates()
+        if not self.pk:  # Если объект только создается
+            self.update_dates()
         super().save(*args, **kwargs)
 
     def update_dates(self):

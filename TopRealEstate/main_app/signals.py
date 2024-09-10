@@ -15,9 +15,5 @@ def update_advert_rating(sender, instance, **kwargs):
 def create_advert_dates(sender, instance, created, **kwargs):
     if created:
         AdvertDates.objects.create(advert=instance)
-    else:
-        # Обновляем даты, если Advert уже существует
-        advert_dates, created = AdvertDates.objects.get_or_create(advert=instance)
-        advert_dates.update_dates()
-        advert_dates.save()
+
 
