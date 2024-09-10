@@ -179,3 +179,19 @@ class AdvertDates(models.Model):
 
     def __str__(self):
         return f"Dates for Advert {self.advert.id}"
+
+
+class Booking(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
+    advert = models.ForeignKey(Advert, on_delete=models.CASCADE, related_name='bookings')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Booking'
+        verbose_name_plural = 'Bookings'
+
+    def __str__(self):
+        return f"Booking by {self.user.username} for {self.advert.title} from {self.start_date} to {self.end_date}"

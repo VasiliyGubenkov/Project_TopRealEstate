@@ -3,8 +3,8 @@ from rest_framework import viewsets
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .models import Advert, AdvertDates
-from .serializers import AdvertSerializer
+from .models import Advert, AdvertDates, Booking
+from .serializers import AdvertSerializer, BookingSerializer
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
 from rest_framework.response import Response
@@ -166,6 +166,7 @@ class AdvertDatesAPIView(APIView):
             end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
 
             if action == 'remove':
+                # Удаление дат
                 new_dates = []
                 for date_str in dates_list:
                     current_date = datetime.strptime(date_str, '%Y-%m-%d').date()
@@ -174,6 +175,14 @@ class AdvertDatesAPIView(APIView):
 
                 advert_dates.dates = ','.join(new_dates)
                 advert_dates.save()
+
+                # Создание записи о бронировании
+                Booking.objects.create(
+                    user=request.user,
+                    advert=advert_dates.advert,
+                    start_date=start_date_obj,
+                    end_date=end_date_obj)
+
                 return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
@@ -183,3 +192,36 @@ class AdvertDatesAPIView(APIView):
         except ValueError:
             return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
 #пример удаления(бронирования) дат {"action": "remove", "start_date": "2024-09-10", "end_date": "2024-09-15"}
+
+
+
+class UserBookingsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        bookings = Booking.objects.filter(user=user)
+        serializer = BookingSerializer(bookings, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BookingDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        booking_id = kwargs.get('id')
+        try:
+            booking = Booking.objects.get(id=booking_id, user=request.user)
+            serializer = BookingSerializer(booking)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking not found or you do not have permission to access it'}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, *args, **kwargs):
+        booking_id = kwargs.get('id')
+        try:
+            booking = Booking.objects.get(id=booking_id, user=request.user)
+            booking.delete()
+            return Response({'message': 'Booking deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking not found or you do not have permission to delete it'}, status=status.HTTP_404_NOT_FOUND)

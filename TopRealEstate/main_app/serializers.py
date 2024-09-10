@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Advert, Rating
+from .models import Advert, Rating, Booking
 
 
 class AdvertSerializer(serializers.ModelSerializer):
@@ -42,5 +42,12 @@ class RatingSerializer(serializers.ModelSerializer):
         instance = super().save(**kwargs)
         instance.advert.update_average_rating()
         return instance
+
+
+class BookingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = ['user', 'advert', 'start_date', 'end_date', 'created_at']
+
 
 
