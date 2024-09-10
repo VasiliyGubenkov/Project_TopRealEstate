@@ -153,11 +153,6 @@ class Rating(models.Model):
 
 
 
-
-
-
-
-
 class AdvertDates(models.Model):
     advert = models.OneToOneField(Advert, on_delete=models.CASCADE, related_name='dates')
     dates = models.TextField(
