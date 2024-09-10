@@ -8,6 +8,7 @@ class AdvertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advert
         fields = '__all__'
+        read_only_fields = ('owner',)
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
