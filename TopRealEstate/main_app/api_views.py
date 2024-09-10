@@ -28,11 +28,9 @@ class AdvertViewSet(viewsets.ModelViewSet):
     ordering = ['title']
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
-    # def perform_create(self, serializer):
-    #     serializer.save(owner=self.request.user)
-
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        advert = serializer.save(owner=self.request.user)
+        AdvertDates.objects.get_or_create(advert=advert)
 
 
 class UserAdvertViewSet(viewsets.ModelViewSet):
