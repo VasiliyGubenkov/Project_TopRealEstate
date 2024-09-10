@@ -171,11 +171,9 @@ class AdvertDates(models.Model):
         today = timezone.now().date()
         dates_list = []
         current_date = today + timedelta(days=1)
-
         for _ in range(365):
             dates_list.append(current_date.strftime('%Y-%m-%d'))
             current_date += timedelta(days=1)
-
         dates_string = ','.join(dates_list)
         self.dates = dates_string
 

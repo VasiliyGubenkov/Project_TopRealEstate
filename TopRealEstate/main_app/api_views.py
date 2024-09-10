@@ -182,5 +182,4 @@ class AdvertDatesAPIView(APIView):
             return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
         except ValueError:
             return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
-
 #пример удаления дат {"action": "remove", "start_date": "2024-09-10", "end_date": "2024-09-15"}
