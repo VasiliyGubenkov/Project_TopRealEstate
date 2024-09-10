@@ -19,6 +19,7 @@ from .filters import RatingFilter
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.filters import OrderingFilter
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
@@ -106,15 +107,17 @@ class RatingViewSet(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = RatingFilter
     ordering_fields = '__all__'
     ordering = ['updated_at']
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user
+        return context
+
     def perform_create(self, serializer):
-        advert = serializer.validated_data.get('advert')
-        if not BookLogging.objects.filter(user=self.request.user, advert=advert).exists():
-            raise serializers.ValidationError({"advert": "You can only rate adverts you have booked."})
         serializer.save(owner=self.request.user)
 
 
