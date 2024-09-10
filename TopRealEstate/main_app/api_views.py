@@ -187,11 +187,18 @@ class AdvertDatesAPIView(APIView):
                 advert_dates.save()
 
                 # Создание записи о бронировании
-                Booking.objects.create(
+                booking = Booking.objects.create(
                     user=request.user,
                     advert=advert_dates.advert,
                     start_date=start_date_obj,
-                    end_date=end_date_obj)
+                    end_date=end_date_obj
+                )
+
+                # Создание записи в BookLogging
+                BookLogging.objects.get_or_create(
+                    user=request.user,
+                    advert=advert_dates.advert
+                )
 
                 return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
             else:
@@ -201,6 +208,7 @@ class AdvertDatesAPIView(APIView):
             return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
         except ValueError:
             return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
+
 #пример удаления(бронирования) дат {"action": "remove", "start_date": "2024-09-10", "end_date": "2024-09-15"}
 
 
