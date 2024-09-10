@@ -106,7 +106,7 @@ class RatingViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = RatingFilter
     ordering_fields = '__all__'
-    ordering = ['created_at']
+    ordering = ['updated_at']
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
