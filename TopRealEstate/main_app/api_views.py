@@ -16,6 +16,7 @@ from .models import Rating
 from .serializers import RatingSerializer
 from .filters import RatingFilter
 from rest_framework.decorators import action
+from django.contrib.auth.models import User
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
@@ -58,11 +59,17 @@ class UserRegistrationView(APIView):
 
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        username = request.data.get('username')
+        email = request.data.get('email')
         password = request.data.get('password')
 
-        if not username or not password:
-            return Response({'error': 'Please provide both username and password'}, status=status.HTTP_400_BAD_REQUEST)
+        if not email or not password:
+            return Response({'error': 'Please provide both email and password'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+            username = user.username
+        except User.DoesNotExist:
+            return Response({'error': 'User with this email does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(request, username=username, password=password)
 
@@ -76,6 +83,30 @@ class LoginAPIView(APIView):
             }, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+#пример запроса {"email": "user@example.com","password": "yourpassword"}
+
+
+
+# class LoginAPIView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         username = request.data.get('username')
+#         password = request.data.get('password')
+#
+#         if not username or not password:
+#             return Response({'error': 'Please provide both username and password'}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         user = authenticate(request, username=username, password=password)
+#
+#         if user is not None:
+#             login(request, user)
+#             csrf_token = get_token(request)
+#             return Response({
+#                 'message': 'Login successful',
+#                 'username': user.username,
+#                 'csrf_token': csrf_token
+#             }, status=status.HTTP_200_OK)
+#         else:
+#             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 #пример запроса: {"username": "your_username", "password": "your_password"}
 
 
