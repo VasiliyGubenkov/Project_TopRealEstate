@@ -1,3 +1,4 @@
+from datetime import datetime
 from rest_framework import viewsets
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -148,8 +149,6 @@ class AdvertDatesAPIView(APIView):
         advert_dates_id = kwargs.get('id')
         try:
             advert_dates = AdvertDates.objects.get(id=advert_dates_id)
-            advert_dates.update_dates()  # Обновляем даты перед отправкой
-            advert_dates.save()
             return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
         except AdvertDates.DoesNotExist:
             return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -157,20 +156,31 @@ class AdvertDatesAPIView(APIView):
     def post(self, request, *args, **kwargs):
         advert_dates_id = kwargs.get('id')
         action = request.data.get('action')
-        dates = request.data.get('dates', [])
+        start_date = request.data.get('start_date')
+        end_date = request.data.get('end_date')
 
         try:
             advert_dates = AdvertDates.objects.get(id=advert_dates_id)
+            dates_list = advert_dates.dates.split(',')
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
 
-            if action == 'add':
-                advert_dates.add_dates(dates)
-            elif action == 'remove':
-                advert_dates.remove_dates(dates)
+            if action == 'remove':
+                new_dates = []
+                for date_str in dates_list:
+                    current_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                    if current_date < start_date_obj or current_date > end_date_obj:
+                        new_dates.append(date_str)
+
+                advert_dates.dates = ','.join(new_dates)
+                advert_dates.save()
+                return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
 
-            advert_dates.update_dates()  # Обновляем даты после изменения
-            advert_dates.save()
-            return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
         except AdvertDates.DoesNotExist:
             return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
+        except ValueError:
+            return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
+
+#пример удаления дат {"action": "remove", "start_date": "2024-09-10", "end_date": "2024-09-15"}
