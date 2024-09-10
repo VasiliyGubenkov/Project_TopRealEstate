@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Advert, Rating, Booking
+from .models import Advert, Rating, Booking, BookLogging
 
 
 class AdvertSerializer(serializers.ModelSerializer):
@@ -39,9 +39,16 @@ class RatingSerializer(serializers.ModelSerializer):
         read_only_fields = ['owner', 'updated_at']
 
     def save(self, **kwargs):
+        advert = self.validated_data.get('advert')
+        user = self.context['request'].user
+
+        if not BookLogging.objects.filter(user=user, advert=advert).exists():
+            raise serializers.ValidationError({"advert": "You can only rate adverts you have booked."})
+
         instance = super().save(**kwargs)
         instance.advert.update_average_rating()
         return instance
+
 
 
 class BookingSerializer(serializers.ModelSerializer):

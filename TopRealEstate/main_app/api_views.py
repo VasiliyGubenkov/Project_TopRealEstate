@@ -18,6 +18,7 @@ from .serializers import RatingSerializer
 from .filters import RatingFilter
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
+from rest_framework import serializers
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
@@ -44,7 +45,9 @@ class UserAdvertViewSet(viewsets.ModelViewSet):
     ordering = ['title']
 
     def get_queryset(self):
-        return Advert.objects.filter(owner=self.request.user)
+        booked_adverts = BookLogging.objects.filter(user=self.request.user).values_list('advert', flat=True)
+        return Advert.objects.filter(id__in=booked_adverts)
+
 
 
 
@@ -109,7 +112,11 @@ class RatingViewSet(viewsets.ModelViewSet):
     ordering = ['updated_at']
 
     def perform_create(self, serializer):
+        advert = serializer.validated_data.get('advert')
+        if not BookLogging.objects.filter(user=self.request.user, advert=advert).exists():
+            raise serializers.ValidationError({"advert": "You can only rate adverts you have booked."})
         serializer.save(owner=self.request.user)
+
 
 
 class UserRatingViewSet(viewsets.ModelViewSet):
