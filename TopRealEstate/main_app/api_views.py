@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from rest_framework import viewsets
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
@@ -221,7 +221,28 @@ class BookingDetailAPIView(APIView):
         booking_id = kwargs.get('id')
         try:
             booking = Booking.objects.get(id=booking_id, user=request.user)
+            # Delete the booking
+            advert_dates = AdvertDates.objects.get(advert=booking.advert)
+            dates_list = advert_dates.dates.split(',')
+            start_date = booking.start_date
+            end_date = booking.end_date
+
+            # Return dates to AdvertDates
+            current_date = start_date
+            while current_date <= end_date:
+                date_str = current_date.strftime('%Y-%m-%d')
+                if date_str not in dates_list:
+                    dates_list.append(date_str)
+                current_date += timedelta(days=1)
+
+            advert_dates.dates = ','.join(sorted(dates_list))
+            advert_dates.save()
+
+            # Delete the booking
             booking.delete()
-            return Response({'message': 'Booking deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+            return Response({'message': 'Booking deleted and dates returned successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found or you do not have permission to delete it'}, status=status.HTTP_404_NOT_FOUND)
+        except AdvertDates.DoesNotExist:
+            return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
