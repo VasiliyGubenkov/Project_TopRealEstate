@@ -18,5 +18,6 @@ urlpatterns = [
     path('login/', LoginAPIView.as_view(), name='api-login'),
     path('logout/', LogoutAPIView.as_view(), name='api-logout'),
     path('api/', include(router.urls)),
+    path('api/dates/<int:id>/', api_views.AdvertDatesAPIView.as_view(), name='advert-dates')
 ]
 

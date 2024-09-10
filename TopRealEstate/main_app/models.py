@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Avg
+from django.utils import timezone
+from datetime import timedelta
+
 
 
 class Advert(models.Model):
@@ -103,9 +106,6 @@ class Advert(models.Model):
 #alex = User.objects.create_user(username='alex', password='87654321', email='v.gubenkov@gmail.com')
 
 
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
 
 
 class Rating(models.Model):
@@ -144,11 +144,44 @@ class Rating(models.Model):
                                       verbose_name="Дата обновления",
                                       help_text='Поле будет заполнено автоматически'
                                       )
-
     class Meta:
         ordering = ['-updated_at']
         verbose_name = 'Rating'
         verbose_name_plural = 'Ratings'
-
     def __str__(self):
         return f"Rating {self.rating} for {self.advert.title}"
+
+
+
+
+
+
+
+
+class AdvertDates(models.Model):
+    advert = models.OneToOneField(Advert, on_delete=models.CASCADE, related_name='dates')
+    dates = models.TextField(
+        verbose_name='Даты',
+        help_text='Даты в формате строки, разделенные запятой, упорядоченные по возрастанию.',
+        blank=True,
+        null=True
+    )
+
+    def save(self, *args, **kwargs):
+        self.update_dates()
+        super().save(*args, **kwargs)
+
+    def update_dates(self):
+        today = timezone.now().date()
+        dates_list = []
+        current_date = today + timedelta(days=1)
+
+        for _ in range(365):
+            dates_list.append(current_date.strftime('%Y-%m-%d'))
+            current_date += timedelta(days=1)
+
+        dates_string = ','.join(dates_list)
+        self.dates = dates_string
+
+    def __str__(self):
+        return f"Dates for Advert {self.advert.id}"

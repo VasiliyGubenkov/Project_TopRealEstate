@@ -9,3 +9,12 @@ class AdvertAdmin(admin.ModelAdmin):
     list_filter = ('title',)
     ordering = ('title',)
     list_per_page = 20
+
+@admin.register(AdvertDates)
+class AdvertDatesAdmin(admin.ModelAdmin):
+    list_display = ('advert', 'dates')
+    list_display_links = ('advert', 'dates')
+    search_fields = ('advert', 'dates')
+    list_filter = ('advert', 'dates')
+    ordering = ('advert',)
+    list_per_page = 20

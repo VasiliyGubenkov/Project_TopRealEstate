@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .models import Advert
+from .models import Advert, AdvertDates
 from .serializers import AdvertSerializer
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
@@ -143,3 +143,36 @@ class UserRatingViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 #Когда пользователь захочет отредактировать свой отзыв, ему нужно будет через слэш написать цифру обьявления, а не айди.
 #Это логично, т.к. человек не может иметь два разных мнения по-поводу одной квартиры. Один обьект- один отзыв.
+
+
+class AdvertDatesAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        advert_dates_id = kwargs.get('id')
+        try:
+            advert_dates = AdvertDates.objects.get(id=advert_dates_id)
+            advert_dates.update_dates()  # Обновляем даты перед отправкой
+            advert_dates.save()
+            return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
+        except AdvertDates.DoesNotExist:
+            return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request, *args, **kwargs):
+        advert_dates_id = kwargs.get('id')
+        action = request.data.get('action')
+        dates = request.data.get('dates', [])
+
+        try:
+            advert_dates = AdvertDates.objects.get(id=advert_dates_id)
+
+            if action == 'add':
+                advert_dates.add_dates(dates)
+            elif action == 'remove':
+                advert_dates.remove_dates(dates)
+            else:
+                return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
+
+            advert_dates.update_dates()  # Обновляем даты после изменения
+            advert_dates.save()
+            return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
+        except AdvertDates.DoesNotExist:
+            return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
