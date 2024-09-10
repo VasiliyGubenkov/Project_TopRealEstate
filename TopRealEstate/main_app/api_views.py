@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .models import Advert, AdvertDates, Booking
+from .models import Advert, AdvertDates, Booking, BookLogging
 from .serializers import AdvertSerializer, BookingSerializer
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import status
@@ -205,6 +205,10 @@ class UserBookingsAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
+
+
 class BookingDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -227,7 +231,6 @@ class BookingDetailAPIView(APIView):
             start_date = booking.start_date
             end_date = booking.end_date
 
-            # Return dates to AdvertDates
             current_date = start_date
             while current_date <= end_date:
                 date_str = current_date.strftime('%Y-%m-%d')
@@ -238,7 +241,8 @@ class BookingDetailAPIView(APIView):
             advert_dates.dates = ','.join(sorted(dates_list))
             advert_dates.save()
 
-            # Delete the booking
+            BookLogging.objects.get_or_create(user=booking.user, advert=booking.advert)
+
             booking.delete()
 
             return Response({'message': 'Booking deleted and dates returned successfully'}, status=status.HTTP_204_NO_CONTENT)

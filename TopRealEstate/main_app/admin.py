@@ -18,3 +18,32 @@ class AdvertDatesAdmin(admin.ModelAdmin):
     list_filter = ('advert', 'dates')
     ordering = ('advert',)
     list_per_page = 20
+
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ('advert', 'owner', 'rating', 'review', 'updated_at')
+    list_display_links = ('advert', 'owner')
+    search_fields = ('advert__title', 'owner__username', 'review')
+    list_filter = ('advert', 'owner', 'rating')
+    ordering = ('-updated_at',)
+    list_per_page = 20
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'advert', 'start_date', 'end_date', 'created_at')
+    list_display_links = ('user', 'advert', 'start_date', 'end_date', 'created_at')
+    search_fields = ('user', 'advert', 'start_date', 'end_date', 'created_at')
+    list_filter = ('user', 'advert', 'start_date', 'end_date', 'created_at')
+    ordering = ('user',)
+    list_per_page = 20
+
+
+@admin.register(BookLogging)
+class BookLoggingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'advert')
+    list_display_links = ('user', 'advert')
+    search_fields = ('user', 'advert')
+    list_filter = ('user', 'advert')
+    ordering = ('user',)
+    list_per_page = 20

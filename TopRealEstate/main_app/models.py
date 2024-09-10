@@ -195,3 +195,15 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking by {self.user.username} for {self.advert.title} from {self.start_date} to {self.end_date}"
+
+
+class BookLogging(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='book_logs')
+    advert = models.ForeignKey(Advert, on_delete=models.CASCADE, related_name='book_logs')
+
+    class Meta:
+        verbose_name = 'Book Logging'
+        verbose_name_plural = 'Book Loggings'
+
+    def __str__(self):
+        return f"User {self.user.username} - Advert {self.advert.title}"
