@@ -52,7 +52,6 @@ class UserAdvertViewSet(viewsets.ModelViewSet):
 
 
 
-
 class UserRegistrationView(APIView):
     def post(self, request, format=None):
         serializer = UserRegistrationSerializer(data=request.data)
@@ -102,7 +101,6 @@ class LogoutAPIView(APIView):
             return Response({'error': 'You are not logged in'}, status=status.HTTP_400_BAD_REQUEST)
 #отправляем ПУСТОЙ пост-запрос
 
-
 class RatingViewSet(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
@@ -113,6 +111,7 @@ class RatingViewSet(viewsets.ModelViewSet):
     ordering = ['updated_at']
 
     def get_serializer_context(self):
+        # Передаем текущего пользователя в контексте сериализатора
         context = super().get_serializer_context()
         context['user'] = self.request.user
         return context

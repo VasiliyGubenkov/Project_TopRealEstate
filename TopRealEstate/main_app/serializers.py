@@ -31,7 +31,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         )
         return user
 
-
 class RatingSerializer(serializers.ModelSerializer):
     advert = serializers.PrimaryKeyRelatedField(queryset=Advert.objects.none())
 
@@ -41,13 +40,14 @@ class RatingSerializer(serializers.ModelSerializer):
         read_only_fields = ['owner', 'updated_at']
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        user = self.context.get('user')  # Получаем пользователя из контекста
         if user and not self.instance:
-            # Фильтруем объявления по пользователю, если он есть и это не обновление существующего объекта
+            # Фильтруем объявления, забронированные пользователем
             self.fields['advert'].queryset = Advert.objects.filter(
                 id__in=BookLogging.objects.filter(user=user).values_list('advert_id', flat=True)
             )
+
 
     def save(self, **kwargs):
         advert = self.validated_data.get('advert')
