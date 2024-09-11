@@ -64,7 +64,7 @@ class RatingSerializer(serializers.ModelSerializer):
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
-        fields = ['user', 'advert', 'start_date', 'end_date', 'created_at']
+        fields = ['id', 'user', 'advert', 'start_date', 'end_date', 'created_at']
 
 
 
