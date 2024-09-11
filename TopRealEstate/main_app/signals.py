@@ -15,5 +15,3 @@ def update_advert_rating(sender, instance, **kwargs):
 def create_advert_dates(sender, instance, created, **kwargs):
     if created:
         AdvertDates.objects.create(advert=instance)
-
-

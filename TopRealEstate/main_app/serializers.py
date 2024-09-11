@@ -62,9 +62,10 @@ class RatingSerializer(serializers.ModelSerializer):
 
 
 class BookingSerializer(serializers.ModelSerializer):
+    owner_of_advert = serializers.ReadOnlyField(source='advert.owner.id')
+    confirmation_from_the_owner = serializers.ChoiceField(choices=[('null', 'Null'), ('confirmed', 'Confirmed'), ('denied', 'Denied')], default='null')
+
     class Meta:
         model = Booking
-        fields = ['id', 'user', 'advert', 'start_date', 'end_date', 'created_at']
-
-
-
+        fields = ['id', 'user', 'advert', 'start_date', 'end_date', 'created_at', 'owner_of_advert', 'confirmation_from_the_owner']
+        read_only_fields = ['user', 'created_at', 'owner_of_advert', 'confirmation_from_the_owner']

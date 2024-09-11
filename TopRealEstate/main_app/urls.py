@@ -21,4 +21,6 @@ urlpatterns = [
     path('api/booking/<int:id>/', api_views.AdvertDatesAPIView.as_view(), name='advert-dates'),
     path('api/mybookings/', api_views.UserBookingsAPIView.as_view(), name='user-bookings'),
     path('api/mybookings/<int:id>/', api_views.BookingDetailAPIView.as_view(), name='booking-detail'),
+    path('api/myconfirmations/', api_views.OwnerBookingListAPIView.as_view(), name='owner-bookings'),
+    path('api/myconfirmations/<int:id>/', api_views.OwnerBookingDetailAPIView.as_view(), name='owner-booking-detail'),
 ]

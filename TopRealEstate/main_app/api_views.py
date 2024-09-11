@@ -214,7 +214,6 @@ class AdvertDatesAPIView(APIView):
             return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
         except ValueError:
             return Response({'error': 'Invalid date format'}, status=status.HTTP_400_BAD_REQUEST)
-
 #пример удаления(бронирования) дат {"action": "remove", "start_date": "2024-09-10", "end_date": "2024-09-15"}
 
 
@@ -229,10 +228,6 @@ class UserBookingsAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
-
-
 class BookingDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -243,34 +238,69 @@ class BookingDetailAPIView(APIView):
             serializer = BookingSerializer(booking)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
-            return Response({'error': 'Booking not found or you do not have permission to access it'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Booking not found or you do not have permission to access it'},
+                            status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         booking_id = kwargs.get('id')
         try:
-            booking = Booking.objects.get(id=booking_id, user=request.user)
-            # Delete the booking
-            advert_dates = AdvertDates.objects.get(advert=booking.advert)
-            dates_list = advert_dates.dates.split(',')
-            start_date = booking.start_date
-            end_date = booking.end_date
+            booking = Booking.objects.get(id=booking_id)
+            if booking.advert.owner != request.user:
+                return Response({'error': 'Only the owner can confirm or deny the booking'},
+                                status=status.HTTP_403_FORBIDDEN)
 
-            current_date = start_date
-            while current_date <= end_date:
-                date_str = current_date.strftime('%Y-%m-%d')
-                if date_str not in dates_list:
-                    dates_list.append(date_str)
-                current_date += timedelta(days=1)
+            new_status = request.data.get('confirmation_from_the_owner')
+            if new_status not in ['confirmed', 'denied']:
+                return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
 
-            advert_dates.dates = ','.join(sorted(dates_list))
-            advert_dates.save()
+            booking.confirmation_from_the_owner = new_status
+            booking.save()
 
-            BookLogging.objects.get_or_create(user=booking.user, advert=booking.advert)
-
-            booking.delete()
-
-            return Response({'message': 'Booking deleted and dates returned successfully'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'message': f'Booking {new_status} successfully'}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
-            return Response({'error': 'Booking not found or you do not have permission to delete it'}, status=status.HTTP_404_NOT_FOUND)
-        except AdvertDates.DoesNotExist:
-            return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class OwnerBookingListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        owner_adverts = Advert.objects.filter(owner=request.user)
+        bookings = Booking.objects.filter(advert__in=owner_adverts)
+        serializer = BookingSerializer(bookings, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+class OwnerBookingDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        booking_id = kwargs.get('id')
+
+        try:
+            booking = Booking.objects.get(id=booking_id, advert__owner=request.user)
+            serializer = BookingSerializer(booking)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking not found or you do not have permission to access it'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def patch(self, request, *args, **kwargs):
+        booking_id = kwargs.get('id')
+        confirmation_status = request.data.get('confirmation_from_the_owner')
+
+        if confirmation_status not in ['confirmed', 'denied']:
+            return Response({'error': 'Invalid confirmation status'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            booking = Booking.objects.get(id=booking_id, advert__owner=request.user)
+            booking.confirmation_from_the_owner = confirmation_status
+            booking.save()
+            return Response({'message': f'Booking {confirmation_status} successfully'}, status=status.HTTP_200_OK)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking not found or you do not have permission to modify it'},
+                            status=status.HTTP_404_NOT_FOUND)
+#пример апи запроса на продверждение или отклонение брони{"confirmation_from_the_owner": "confirmed"  // или "denied"}
