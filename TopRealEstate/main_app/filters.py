@@ -1,6 +1,4 @@
-import django_filters
-from .models import Advert
-from .models import Rating
+from .models import Advert, Rating
 import django_filters
 
 

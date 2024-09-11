@@ -62,6 +62,11 @@ class UserRegistrationView(APIView):
 #пример запроса: {"username": "newuser", "email": "newuser@example.com", "password": "password123", "password_confirm": "password123"}
 
 
+
+
+
+
+
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
@@ -92,6 +97,9 @@ class LoginAPIView(APIView):
 
 
 
+
+
+
 class LogoutAPIView(APIView):
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -100,6 +108,10 @@ class LogoutAPIView(APIView):
         else:
             return Response({'error': 'You are not logged in'}, status=status.HTTP_400_BAD_REQUEST)
 #отправляем ПУСТОЙ пост-запрос
+
+
+
+
 
 class RatingViewSet(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
@@ -111,14 +123,12 @@ class RatingViewSet(viewsets.ModelViewSet):
     ordering = ['updated_at']
 
     def get_serializer_context(self):
-        # Передаем текущего пользователя в контексте сериализатора
         context = super().get_serializer_context()
         context['user'] = self.request.user
         return context
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-
 
 
 class UserRatingViewSet(viewsets.ModelViewSet):
@@ -154,6 +164,8 @@ class UserRatingViewSet(viewsets.ModelViewSet):
 
 
 class AdvertDatesAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request, *args, **kwargs):
         advert_dates_id = kwargs.get('id')
         try:
@@ -163,29 +175,27 @@ class AdvertDatesAPIView(APIView):
             return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+
         advert_dates_id = kwargs.get('id')
         action = request.data.get('action')
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
-
         try:
             advert_dates = AdvertDates.objects.get(id=advert_dates_id)
             dates_list = advert_dates.dates.split(',')
             start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
-
             if action == 'remove':
-                # Удаление дат
                 new_dates = []
                 for date_str in dates_list:
                     current_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                     if current_date < start_date_obj or current_date > end_date_obj:
                         new_dates.append(date_str)
-
                 advert_dates.dates = ','.join(new_dates)
                 advert_dates.save()
 
-                # Создание записи о бронировании
                 booking = Booking.objects.create(
                     user=request.user,
                     advert=advert_dates.advert,
@@ -193,16 +203,13 @@ class AdvertDatesAPIView(APIView):
                     end_date=end_date_obj
                 )
 
-                # Создание записи в BookLogging
                 BookLogging.objects.get_or_create(
                     user=request.user,
                     advert=advert_dates.advert
                 )
-
                 return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
-
         except AdvertDates.DoesNotExist:
             return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
         except ValueError:

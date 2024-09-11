@@ -103,7 +103,7 @@ class Advert(models.Model):
         verbose_name_plural = 'Adverts'
     def __str__(self):
         return f"{self.title}"
-#alex = User.objects.create_user(username='alex', password='87654321', email='v.gubenkov@gmail.com')
+#alex = User.objects.create_user(username='^^^^', password='^^^^^^', email='^^^^^^^^^')
 
 
 
@@ -163,7 +163,7 @@ class AdvertDates(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if not self.pk:  # Если объект только создается
+        if not self.pk:
             self.update_dates()
         super().save(*args, **kwargs)
 

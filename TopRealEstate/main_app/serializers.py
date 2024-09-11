@@ -41,9 +41,8 @@ class RatingSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        user = self.context.get('user')  # Получаем пользователя из контекста
+        user = self.context.get('user')
         if user and not self.instance:
-            # Фильтруем объявления, забронированные пользователем
             self.fields['advert'].queryset = Advert.objects.filter(
                 id__in=BookLogging.objects.filter(user=user).values_list('advert_id', flat=True)
             )
