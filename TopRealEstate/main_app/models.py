@@ -6,6 +6,9 @@ from datetime import timedelta
 
 
 
+
+
+
 class Advert(models.Model):
     title = models.CharField(max_length=200,
                              verbose_name='Заголовок обьявления',
@@ -108,6 +111,8 @@ class Advert(models.Model):
 
 
 
+
+
 class Rating(models.Model):
     advert = models.ForeignKey(Advert,
                                verbose_name="Объявление",
@@ -153,6 +158,9 @@ class Rating(models.Model):
 
 
 
+
+
+
 class AdvertDates(models.Model):
     advert = models.OneToOneField(Advert, on_delete=models.CASCADE, related_name='dates')
     dates = models.TextField(
@@ -182,6 +190,9 @@ class AdvertDates(models.Model):
 
 
 
+
+
+
 class BookLogging(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='book_logs')
     advert = models.ForeignKey(Advert, on_delete=models.CASCADE, related_name='book_logs')
@@ -192,6 +203,10 @@ class BookLogging(models.Model):
 
     def __str__(self):
         return f"User {self.user.username} - Advert {self.advert.title}"
+
+
+
+
 
 
 class Booking(models.Model):

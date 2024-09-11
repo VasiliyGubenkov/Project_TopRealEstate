@@ -3,12 +3,20 @@ from django.contrib.auth.models import User
 from .models import Advert, Rating, Booking, BookLogging
 
 
+
+
+
+
 class AdvertSerializer(serializers.ModelSerializer):
     average_rating = serializers.FloatField(read_only=True)
     class Meta:
         model = Advert
         fields = '__all__'
         read_only_fields = ('owner',)
+
+
+
+
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -30,6 +38,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             password=validated_data['password']
         )
         return user
+
+
+
+
+
 
 class RatingSerializer(serializers.ModelSerializer):
     advert = serializers.PrimaryKeyRelatedField(queryset=Advert.objects.none())
@@ -58,6 +71,9 @@ class RatingSerializer(serializers.ModelSerializer):
         instance = super().save(**kwargs)
         instance.advert.update_average_rating()
         return instance
+
+
+
 
 
 

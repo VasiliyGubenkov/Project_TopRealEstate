@@ -10,7 +10,6 @@ def update_advert_rating(sender, instance, **kwargs):
     instance.advert.update_average_rating()
 
 
-
 @receiver(post_save, sender=Advert)
 def create_advert_dates(sender, instance, created, **kwargs):
     if created:
