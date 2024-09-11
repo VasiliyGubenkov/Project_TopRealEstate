@@ -14,7 +14,7 @@ class AdvertFilter(django_filters.FilterSet):
     class Meta:
         model = Advert
         fields = ['id', 'title', 'description', 'address_city_name', 'address_street_name',
-                  'address_house_number', 'price', 'number_of_rooms', 'type', 'owner', 'is_active']
+                  'address_house_number', 'price', 'number_of_rooms', 'type', 'is_active']
 
 
 
