@@ -350,11 +350,11 @@ class MyRatingDetailView(APIView):
             return Response({'error': 'Rating not found or you do not have permission to access it'},
                             status=status.HTTP_404_NOT_FOUND)
 
-    def put(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         rating_id = kwargs.get('id')
         try:
             rating = Rating.objects.get(id=rating_id, owner=request.user)
-            serializer = RatingSerializer(rating, data=request.data, partial=True)
+            serializer = RatingSerializer(rating, data=request.data, partial=True)  # Используем partial=True для частичного обновления
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
