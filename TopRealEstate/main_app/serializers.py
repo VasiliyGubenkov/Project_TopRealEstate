@@ -46,10 +46,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 class RatingSerializer(serializers.ModelSerializer):
     advert = serializers.PrimaryKeyRelatedField(queryset=Advert.objects.none())
+    id = serializers.IntegerField(read_only=True)  # Добавляем это поле
 
     class Meta:
         model = Rating
-        fields = ['advert', 'owner', 'rating', 'review', 'updated_at']
+        fields = ['id', 'advert', 'owner', 'rating', 'review', 'updated_at']
         read_only_fields = ['owner', 'updated_at']
 
     def __init__(self, *args, **kwargs):

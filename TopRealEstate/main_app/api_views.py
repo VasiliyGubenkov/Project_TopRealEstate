@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from rest_framework import viewsets, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Advert, AdvertDates, Booking, BookLogging, Rating
 from .serializers import AdvertSerializer, BookingSerializer, UserRegistrationSerializer, RatingSerializer
@@ -319,3 +320,55 @@ class OwnerBookingDetailAPIView(APIView):
                             status=status.HTTP_404_NOT_FOUND)
 
 #пример апи запроса на продверждение или отклонение брони {"confirmation_from_the_owner": "confirmed"  // или "denied"}
+
+
+
+
+
+
+
+class MyRatingsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        ratings = Rating.objects.filter(owner=user)
+        serializer = RatingSerializer(ratings, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MyRatingDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        rating_id = kwargs.get('id')
+        try:
+            rating = Rating.objects.get(id=rating_id, owner=request.user)
+            serializer = RatingSerializer(rating)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Rating.DoesNotExist:
+            return Response({'error': 'Rating not found or you do not have permission to access it'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, *args, **kwargs):
+        rating_id = kwargs.get('id')
+        try:
+            rating = Rating.objects.get(id=rating_id, owner=request.user)
+            serializer = RatingSerializer(rating, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Rating.DoesNotExist:
+            return Response({'error': 'Rating not found or you do not have permission to modify it'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, *args, **kwargs):
+        rating_id = kwargs.get('id')
+        try:
+            rating = Rating.objects.get(id=rating_id, owner=request.user)
+            rating.delete()
+            return Response({'message': 'Rating deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Rating.DoesNotExist:
+            return Response({'error': 'Rating not found or you do not have permission to delete it'},
+                            status=status.HTTP_404_NOT_FOUND)
