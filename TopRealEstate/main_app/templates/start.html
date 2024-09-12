@@ -1,37 +1,94 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добро пожаловать на сайт TopRealEstate</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: url('{% static "unicorn.jpeg" %}') no-repeat center center fixed;
-            background-size: cover;
-            font-family: Arial, sans-serif;
-            color: #fff;
-            text-align: center;
-        }
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        p {
-            font-size: 1.5rem;
-        }
-    </style>
+    <title>Проект Василия Губенкова</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <div>
-        <h1>Добро пожаловать на сайт TopRealEstate</h1>
-        <p>К сожалению, пока сайт работает только через API.</p>
+    <div class="container">
+        <header>
+            <h1>Проект Василия Губенкова</h1>
+            <p>В рамках обучения в школе “ICH”</p>
+        </header>
+        <main>
+            <section>
+                <p>Это импровизированный бэк-энд для вымышленного сервиса по краткосрочной аренде объектов недвижимости. API-сервис принимает команды в формате JSON и отдаёт информацию в соответствующем формате. Вы можете протестировать его прямо в браузере, благодаря функции “стандартного представления Django Rest Framework”. Этот-же проект может работать как реальный бэк-энд, для реального фронтенда.</p>
+            </section>
+            <section>
+                <h2>Инструкция по пользованию API</h2>
+                <p>Вы можете просмотреть объявления на сайте, для этого не нужна регистрация. Для этого перейдите по адресу:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/adverts</span></li>
+                </ul>
+                <p>Если вы хотите сами разместить объявление, вам нужно зарегистрироваться:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/registration</span></li>
+                </ul>
+                <p>После прохождения регистрации вы можете войти в систему под своим логином и паролем:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/login</span></li>
+                </ul>
+                <p>Вы можете выйти из системы:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/logout</span></li>
+                </ul>
+                <p>После того, как вы вошли в систему под своим логином и паролем, вы можете пользоваться всем её функционалом. Для размещения своего объявления перейдите:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/adverts</span></li>
+                </ul>
+                <p>Если вы хотите просмотреть все свои объявления, перейдите:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myadverts</span></li>
+                </ul>
+                <p>Если вы хотите отредактировать или удалить своё объявление, запомните его ID и перейдите:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myadverts/ID</span></li>
+                </ul>
+                <p>Если вы хотите забронировать чей-то объект недвижимости на определённые даты, запомните его ID и перейдите:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/booking/ID</span></li>
+                </ul>
+                <p>Просмотрите все ваши бронирования и статусы согласования с собственником недвижимости:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/mybookings</span></li>
+                </ul>
+                <p>Вы можете удалить свою бронь на любом этапе. Запомните ID брони и перейдите:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/mybookings/ID</span></li>
+                </ul>
+                <p>Если вы являетесь владельцем недвижимости, то вы можете просмотреть кто, когда и на какие даты забронировал ваши объекты:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myconfirmations</span></li>
+                </ul>
+                <p>Вы должны подтвердить или отказать человеку, который хочет забронировать вашу недвижимость. Для этого запомните ID и перейдите:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myconfirmations/ID</span></li>
+                </ul>
+                <p>Вы, как пользователь сервиса, можете просматривать средние рейтинги объявлений. Это можно сделать на главной странице:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/adverts</span></li>
+                </ul>
+                <p>Вы можете просмотреть отзывы, которые оставляли пользователи:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/ratings</span></li>
+                </ul>
+                <p>Вы можете сами оставить отзыв и рейтинг на объявление:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/ratings</span></li>
+                </ul>
+                <p>Вы можете просмотреть свои отзывы, которые вы оставили ранее:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myratings</span></li>
+                </ul>
+                <p>Вы можете отредактировать или удалить свой отзыв, который вы оставили ранее, для этого запомните ID отзыва (Один пользователь не может оставить два разных отзыва на одно и то-же объявление!) и перейдите:</p>
+                <ul>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myratings/ID</span></li>
+                </ul>
+            </section>
+        </main>
     </div>
 </body>
 </html>

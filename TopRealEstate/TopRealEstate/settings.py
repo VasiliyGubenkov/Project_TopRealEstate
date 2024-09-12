@@ -8,7 +8,7 @@ Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 env.read_env(BASE_DIR / '.env')
 SECRET_KEY = env.str("SECRET_KEY")
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 
@@ -121,11 +121,9 @@ TEMPLATES = [
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'main_app', 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = 'main_app:login'
-
-
-
 
