@@ -18,7 +18,6 @@ from .serializers import RatingSerializer
 from .filters import RatingFilter
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
-from rest_framework import serializers
 from rest_framework.filters import OrderingFilter
 
 
@@ -252,9 +251,9 @@ class UserBookingsAPIView(APIView):
 
 
 
-
 class BookingDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         booking_id = kwargs.get('id')
         try:
@@ -269,24 +268,26 @@ class BookingDetailAPIView(APIView):
         booking_id = kwargs.get('id')
         try:
             booking = Booking.objects.get(id=booking_id, user=request.user)
-            advert_dates = booking.advert.dates
-            start_date = booking.start_date
-            end_date = booking.end_date
 
-            if advert_dates:
-                existing_dates = advert_dates.dates.split(',')
-            else:
-                existing_dates = []
+            if booking.confirmation_from_the_owner == 'confirmed':
+                advert_dates = booking.advert.dates
+                start_date = booking.start_date
+                end_date = booking.end_date
 
-            date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
-            new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
+                if advert_dates:
+                    existing_dates = advert_dates.dates.split(',')
+                else:
+                    existing_dates = []
 
-            booking.advert.dates.dates = ','.join(sorted(set(new_dates)))
-            booking.advert.dates.save()
+                date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
+                new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
+
+                booking.advert.dates.dates = ','.join(sorted(set(new_dates)))
+                booking.advert.dates.save()
 
             booking.delete()
 
-            return Response({'message': 'Booking deleted and dates returned successfully'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'message': 'Booking deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found or you do not have permission to delete it'},
                             status=status.HTTP_404_NOT_FOUND)
@@ -303,6 +304,10 @@ class OwnerBookingListAPIView(APIView):
         bookings = Booking.objects.filter(advert__in=owner_adverts)
         serializer = BookingSerializer(bookings, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
 
 
 class OwnerBookingDetailAPIView(APIView):
