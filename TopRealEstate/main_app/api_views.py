@@ -305,12 +305,9 @@ class OwnerBookingListAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
-
-
 class OwnerBookingDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         booking_id = kwargs.get('id')
 
@@ -331,10 +328,31 @@ class OwnerBookingDetailAPIView(APIView):
 
         try:
             booking = Booking.objects.get(id=booking_id, advert__owner=request.user)
+
+            if confirmation_status == 'denied':
+                advert_dates = booking.advert.dates
+                start_date = booking.start_date
+                end_date = booking.end_date
+
+                if advert_dates:
+                    existing_dates = advert_dates.dates.split(',')
+                else:
+                    existing_dates = []
+
+                date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
+                # Добавляем их обратно в доступные даты
+                new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
+
+                booking.advert.dates.dates = ','.join(sorted(set(new_dates)))
+                booking.advert.dates.save()
+
+            # Обновляем статус подтверждения
             booking.confirmation_from_the_owner = confirmation_status
             booking.save()
+
             return Response({'message': f'Booking {confirmation_status} successfully'}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found or you do not have permission to modify it'},
                             status=status.HTTP_404_NOT_FOUND)
+
 #пример апи запроса на продверждение или отклонение брони {"confirmation_from_the_owner": "confirmed"  // или "denied"}
