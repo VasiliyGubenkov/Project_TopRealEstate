@@ -8,7 +8,6 @@ router = DefaultRouter()
 router.register('adverts', api_views.AdvertViewSet, basename='adverts')
 router.register('myadverts', api_views.UserAdvertViewSet, basename='myadverts')
 router.register('ratings', api_views.RatingViewSet, basename='ratings')
-router.register('myratings', api_views.UserRatingViewSet, basename='myratings')
 app_name = 'main_app'
 
 

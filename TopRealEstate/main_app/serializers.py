@@ -60,13 +60,12 @@ class RatingSerializer(serializers.ModelSerializer):
                 id__in=BookLogging.objects.filter(user=user).values_list('advert_id', flat=True)
             )
 
-
     def save(self, **kwargs):
         advert = self.validated_data.get('advert')
         user = self.context['request'].user
 
-        if not BookLogging.objects.filter(user=user, advert=advert).exists():
-            raise serializers.ValidationError({"advert": "You can only rate adverts you have booked."})
+        if Rating.objects.filter(owner=user, advert=advert).exists():
+            raise serializers.ValidationError({"advert": "You have already rated this advert."})
 
         instance = super().save(**kwargs)
         instance.advert.update_average_rating()

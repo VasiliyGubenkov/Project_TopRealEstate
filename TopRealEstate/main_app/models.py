@@ -149,12 +149,16 @@ class Rating(models.Model):
                                       verbose_name="Дата обновления",
                                       help_text='Поле будет заполнено автоматически'
                                       )
+
     class Meta:
         ordering = ['-updated_at']
         verbose_name = 'Rating'
         verbose_name_plural = 'Ratings'
+        unique_together = ('owner', 'advert')
+
     def __str__(self):
         return f"Rating {self.rating} for {self.advert.title}"
+
 
 
 
