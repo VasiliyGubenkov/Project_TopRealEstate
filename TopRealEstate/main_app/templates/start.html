@@ -21,71 +21,74 @@
                 <h2>Инструкция по пользованию API</h2>
                 <p>Вы можете просмотреть объявления на сайте, для этого не нужна регистрация. Для этого перейдите по адресу:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/adverts</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/adverts - Просмотр объявлений на сайте, без регистрации.</span></li>
                 </ul>
                 <p>Если вы хотите сами разместить объявление, вам нужно зарегистрироваться:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/registration</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/registration - Регистрация в системе. Для регистрации отправьте JSON в следующем формате: {"username": "********", "email": "*********", "password": "не менее восьми знаков", "password_confirm": "не менее восьми знаков"}
+</span></li>
                 </ul>
                 <p>После прохождения регистрации вы можете войти в систему под своим логином и паролем:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/login</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/login - Вход в систему. Для входа отправьте JSON в следующем формате: {"email": "*********","password": "*********"}
+</span></li>
                 </ul>
                 <p>Вы можете выйти из системы:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/logout</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/logout - Выход из системы. Для выхода отправьте пустой post-запрос. Ничего не пишите в post-запросе!
+</span></li>
                 </ul>
                 <p>После того, как вы вошли в систему под своим логином и паролем, вы можете пользоваться всем её функционалом. Для размещения своего объявления перейдите:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/adverts</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/adverts - Разместить своё объявление и просмотреть чужие.</span></li>
                 </ul>
                 <p>Если вы хотите просмотреть все свои объявления, перейдите:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/myadverts</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myadverts - Просмотр всех своих объявлений.</span></li>
                 </ul>
                 <p>Если вы хотите отредактировать или удалить своё объявление, запомните его ID и перейдите:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/myadverts/ID</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myadverts/ID - Редактирование или удаление своего объявления.</span></li>
                 </ul>
                 <p>Если вы хотите забронировать чей-то объект недвижимости на определённые даты, запомните его ID и перейдите:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/booking/ID</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/booking/ID - Бронирование недвижимости. Просмотрите свободные даты и если хотите забронировать, то отправьте JSON в следующем формате: {"action": "remove", "start_date": "2024-09-10", "end_date": "2024-09-15"} . После того, как вы отправите свой запрос, эти даты исчезнут из списка доступных дат, но это ещё не значит, что вы забронировали эту недвижимость, т.е. владелец недвижимости должен подтвердить ваше бронирование или отказать вам.</span></li>
                 </ul>
                 <p>Просмотрите все ваши бронирования и статусы согласования с собственником недвижимости:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/mybookings</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/mybookings - Просмотр информации о ваших бронированиях. В брони есть строка “confirmation_from_the_owner” она может иметь три состояния: “none”, “confirmed”, “denied”. Ожидайте, пока владелец недвижимости согласует вашу бронь.</span></li>
                 </ul>
                 <p>Вы можете удалить свою бронь на любом этапе. Запомните ID брони и перейдите:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/mybookings/ID</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/mybookings/ID - Удалить своё бронирование.</span></li>
                 </ul>
                 <p>Если вы являетесь владельцем недвижимости, то вы можете просмотреть кто, когда и на какие даты забронировал ваши объекты:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/myconfirmations</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myconfirmations - Просмотр бронирований ваших объектов пользователями сайта.</span></li>
                 </ul>
                 <p>Вы должны подтвердить или отказать человеку, который хочет забронировать вашу недвижимость. Для этого запомните ID и перейдите:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/myconfirmations/ID</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myconfirmations/ID - Согласование бронирования. Чтобы подтвердить бронирование или отказать пользователю вам нужно отправить JSON в следующем формате: {"confirmation_from_the_owner": "confirmed"  или "denied"}. Если вы откажите пользователю, то даты, которые он бронировал, сразу-же вернутся в доступные для бронирования других пользователей.</span></li>
                 </ul>
                 <p>Вы, как пользователь сервиса, можете просматривать средние рейтинги объявлений. Это можно сделать на главной странице:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/adverts</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/adverts - Просмотр всей информации об объявлении, включая его средний рейтинг.</span></li>
                 </ul>
                 <p>Вы можете просмотреть отзывы, которые оставляли пользователи:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/ratings</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/ratings - Просмотр отзывов и рейтингов об объектах недвижимости.</span></li>
                 </ul>
                 <p>Вы можете сами оставить отзыв и рейтинг на объявление:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/ratings</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/ratings - Оставить отзыв и рейтинг.</span></li>
                 </ul>
                 <p>Вы можете просмотреть свои отзывы, которые вы оставили ранее:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/myratings</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myratings - Просмотр своих отзывов, которые вы оставили ранее.</span></li>
                 </ul>
                 <p>Вы можете отредактировать или удалить свой отзыв, который вы оставили ранее, для этого запомните ID отзыва (Один пользователь не может оставить два разных отзыва на одно и то-же объявление!) и перейдите:</p>
                 <ul>
-                    <li><span class="url-path">www.beautiful-code.ru/api/myratings/ID</span></li>
+                    <li><span class="url-path">www.beautiful-code.ru/api/myratings/ID - Редактирование или удаление своего отзыва. Для этого отправьте шаблон {"rating": 10,"review": "Великолепно!"}</span></li>
                 </ul>
             </section>
         </main>
