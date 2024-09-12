@@ -194,8 +194,18 @@ class AdvertDates(models.Model):
 
 
 class BookLogging(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='book_logs')
-    advert = models.ForeignKey(Advert, on_delete=models.CASCADE, related_name='book_logs')
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             related_name='book_logs',
+                             verbose_name="Пользователь",
+                             help_text="Укажите здесь пользователя, который бронирует обьект",
+                             )
+    advert = models.ForeignKey(Advert,
+                               on_delete=models.CASCADE,
+                               related_name='book_logs',
+                               verbose_name="Объявление",
+                               help_text="Выберите объявление",
+                               )
 
     class Meta:
         verbose_name = 'Book Logging'
@@ -210,29 +220,37 @@ class BookLogging(models.Model):
 
 
 class Booking(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
-    advert = models.ForeignKey(Advert, on_delete=models.CASCADE, related_name='bookings')
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             related_name='bookings',
+                             verbose_name="Пользователь",
+                             help_text="Укажите здесь пользователя",
+                             )
+    advert = models.ForeignKey(Advert,
+                               on_delete=models.CASCADE,
+                               related_name='bookings',
+                               verbose_name="Объявление",
+                               help_text="Выберите объявление",
+                               )
     start_date = models.DateField()
     end_date = models.DateField()
     created_at = models.DateTimeField(default=timezone.now)
-    confirmation_from_the_owner = models.CharField(
-        max_length=10,
-        choices=[(None, 'Not Confirmed'), ('confirmed', 'Confirmed'), ('denied', 'Denied')],
-        default=None,
-        null=True,
-        blank=True,
-        verbose_name="Confirmation Status",
-        help_text="Status of the booking confirmation from the owner"
-    )
-    owner_of_advert = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='owned_bookings',
-        blank=True,
-        null=True,
-        verbose_name="Owner of Advert",
-        help_text="Owner of the advert associated with this booking"
-    )
+    confirmation_from_the_owner = models.CharField(max_length=10,
+                                                   choices=[(None, 'Not Confirmed'), ('confirmed', 'Confirmed'), ('denied', 'Denied')],
+                                                   default=None,
+                                                   null=True,
+                                                   blank=True,
+                                                   verbose_name="Статус подтверждения от владельца недвижимости",
+                                                   help_text="Выберите статус, подтверждает владелец недвижимости или нет",
+                                                   )
+    owner_of_advert = models.ForeignKey(User,
+                                        on_delete=models.CASCADE,
+                                        related_name='owned_bookings',
+                                        blank=True,
+                                        null=True,
+                                        verbose_name="Автор объявления",
+                                        help_text="Выберите автора объявления"
+                                        )
 
     class Meta:
         ordering = ['created_at']

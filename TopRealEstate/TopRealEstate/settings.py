@@ -8,7 +8,7 @@ Env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
 env.read_env(BASE_DIR / '.env')
 SECRET_KEY = env.str("SECRET_KEY")
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 

@@ -1,21 +1,15 @@
 from datetime import datetime, timedelta
-from rest_framework import viewsets
-from rest_framework import filters
+from rest_framework import viewsets, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from .models import Advert, AdvertDates, Booking, BookLogging
-from .serializers import AdvertSerializer, BookingSerializer
+from .models import Advert, AdvertDates, Booking, BookLogging, Rating
+from .serializers import AdvertSerializer, BookingSerializer, UserRegistrationSerializer, RatingSerializer
 from .permissions import IsOwnerOrReadOnly
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserRegistrationSerializer
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
-from .filters import AdvertFilter
-from .models import Rating
-from .serializers import RatingSerializer
-from .filters import RatingFilter
+from .filters import AdvertFilter, RatingFilter
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
 from rest_framework.filters import OrderingFilter
