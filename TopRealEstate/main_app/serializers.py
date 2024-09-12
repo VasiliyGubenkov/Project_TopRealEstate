@@ -46,7 +46,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 class RatingSerializer(serializers.ModelSerializer):
     advert = serializers.PrimaryKeyRelatedField(queryset=Advert.objects.none())
-    id = serializers.IntegerField(read_only=True)  # Добавляем это поле
+    id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Rating
@@ -55,7 +55,7 @@ class RatingSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        user = self.context.get('user')
+        user = self.context.get('request').user if 'request' in self.context else None
         if user and not self.instance:
             self.fields['advert'].queryset = Advert.objects.filter(
                 id__in=BookLogging.objects.filter(user=user).values_list('advert_id', flat=True)
@@ -63,7 +63,11 @@ class RatingSerializer(serializers.ModelSerializer):
 
     def save(self, **kwargs):
         advert = self.validated_data.get('advert')
-        user = self.context['request'].user
+        request = self.context.get('request')
+        if request is None:
+            raise serializers.ValidationError({"request": "Request context is required but missing"})
+
+        user = request.user
 
         if Rating.objects.filter(owner=user, advert=advert).exists():
             raise serializers.ValidationError({"advert": "You have already rated this advert."})

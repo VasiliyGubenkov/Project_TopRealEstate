@@ -128,11 +128,8 @@ class RatingViewSet(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['user'] = self.request.user
+        context['request'] = self.request  # Передаем только request
         return context
-
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
 
 
 
@@ -304,13 +301,11 @@ class OwnerBookingDetailAPIView(APIView):
                     existing_dates = []
 
                 date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
-                # Добавляем их обратно в доступные даты
                 new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
 
                 booking.advert.dates.dates = ','.join(sorted(set(new_dates)))
                 booking.advert.dates.save()
 
-            # Обновляем статус подтверждения
             booking.confirmation_from_the_owner = confirmation_status
             booking.save()
 
@@ -337,6 +332,8 @@ class MyRatingsListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+
+
 class MyRatingDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -354,7 +351,7 @@ class MyRatingDetailView(APIView):
         rating_id = kwargs.get('id')
         try:
             rating = Rating.objects.get(id=rating_id, owner=request.user)
-            serializer = RatingSerializer(rating, data=request.data, partial=True)  # Используем partial=True для частичного обновления
+            serializer = RatingSerializer(rating, data=request.data, partial=True, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -372,3 +369,4 @@ class MyRatingDetailView(APIView):
         except Rating.DoesNotExist:
             return Response({'error': 'Rating not found or you do not have permission to delete it'},
                             status=status.HTTP_404_NOT_FOUND)
+#пример изменения рейтинга и содержания отзыва {"rating": 10,"review": "Великолепно!"}
