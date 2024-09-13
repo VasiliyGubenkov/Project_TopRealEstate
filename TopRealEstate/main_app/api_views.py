@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from rest_framework import viewsets, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Advert, AdvertDates, Booking, BookLogging, Rating
 from .serializers import AdvertSerializer, BookingSerializer, UserRegistrationSerializer, RatingSerializer
@@ -12,6 +13,7 @@ from django.middleware.csrf import get_token
 from .filters import AdvertFilter, RatingFilter
 from django.contrib.auth.models import User
 from rest_framework.filters import OrderingFilter
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
@@ -25,18 +27,6 @@ class AdvertViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         advert = serializer.save(owner=self.request.user)
         AdvertDates.objects.get_or_create(advert=advert)
-
-
-class UserAdvertViewSet(viewsets.ModelViewSet):
-    serializer_class = AdvertSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_class = AdvertFilter
-    ordering_fields = '__all__'
-    ordering = ['title']
-    def get_queryset(self):
-        booked_adverts = BookLogging.objects.filter(user=self.request.user).values_list('advert', flat=True)
-        return Advert.objects.filter(id__in=booked_adverts)
 
 
 class UserRegistrationView(APIView):
@@ -281,3 +271,18 @@ class BookingDetailAPIView(APIView):
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found or you do not have permission to delete it'},
                             status=status.HTTP_404_NOT_FOUND)
+
+
+class MyAdvertsListView(ListAPIView):
+    serializer_class = AdvertSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        return Advert.objects.filter(owner=self.request.user)
+
+
+class MyAdvertDetailView(RetrieveUpdateDestroyAPIView):
+    serializer_class = AdvertSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    lookup_field = 'id'
+    def get_queryset(self):
+        return Advert.objects.filter(owner=self.request.user)

@@ -6,7 +6,6 @@ from .api_views import LoginAPIView, LogoutAPIView
 
 router = DefaultRouter()
 router.register('adverts', api_views.AdvertViewSet, basename='adverts')
-router.register('myadverts', api_views.UserAdvertViewSet, basename='myadverts')
 router.register('ratings', api_views.RatingViewSet, basename='ratings')
 app_name = 'main_app'
 
@@ -24,4 +23,6 @@ urlpatterns = [
     path('api/myconfirmations/<int:id>/', api_views.OwnerBookingDetailAPIView.as_view(), name='owner-booking-detail'),
     path('api/myratings/', api_views.MyRatingsListView.as_view(), name='my-ratings-list'),
     path('api/myratings/<int:id>/', api_views.MyRatingDetailView.as_view(), name='my-rating-detail'),
+    path('api/myadverts/', api_views.MyAdvertsListView.as_view(), name='my-adverts-list'),
+    path('api/myadverts/<int:id>/', api_views.MyAdvertDetailView.as_view(), name='my-advert-detail'),
 ]
