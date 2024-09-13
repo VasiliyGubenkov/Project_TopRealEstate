@@ -121,12 +121,13 @@ class AdvertDatesAPIView(APIView):
             dates_list = advert_dates.dates.split(',')
             start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
+            date_range = [start_date_obj + timedelta(days=x) for x in range((end_date_obj - start_date_obj).days + 1)]
+            date_range_strings = [date.strftime('%Y-%m-%d') for date in date_range]
             if action == 'remove':
-                new_dates = []
-                for date_str in dates_list:
-                    current_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                    if current_date < start_date_obj or current_date > end_date_obj:
-                        new_dates.append(date_str)
+                missing_dates = [date for date in date_range_strings if date not in dates_list]
+                if missing_dates:
+                    return Response({'error': 'Some dates in the range are not available'}, status=status.HTTP_400_BAD_REQUEST)
+                new_dates = [date for date in dates_list if date not in date_range_strings]
                 advert_dates.dates = ','.join(new_dates)
                 advert_dates.save()
                 booking = Booking.objects.create(
