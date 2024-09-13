@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from rest_framework import viewsets, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Advert, AdvertDates, Booking, BookLogging, Rating
 from .serializers import AdvertSerializer, BookingSerializer, UserRegistrationSerializer, RatingSerializer
@@ -11,7 +10,6 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from .filters import AdvertFilter, RatingFilter
-from rest_framework.decorators import action
 from django.contrib.auth.models import User
 from rest_framework.filters import OrderingFilter
 
@@ -118,6 +116,9 @@ class AdvertDatesAPIView(APIView):
         end_date = request.data.get('end_date')
         try:
             advert_dates = AdvertDates.objects.get(id=advert_dates_id)
+            advert = advert_dates.advert
+            if request.user == advert.owner:
+                return Response({'error': 'You cannot book your own advertisement'}, status=status.HTTP_403_FORBIDDEN)
             dates_list = advert_dates.dates.split(',')
             start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
