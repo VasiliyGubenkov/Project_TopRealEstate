@@ -16,10 +16,6 @@ from django.contrib.auth.models import User
 from rest_framework.filters import OrderingFilter
 
 
-
-
-
-
 class AdvertViewSet(viewsets.ModelViewSet):
     queryset = Advert.objects.all()
     serializer_class = AdvertSerializer
@@ -28,32 +24,21 @@ class AdvertViewSet(viewsets.ModelViewSet):
     ordering_fields = '__all__'
     ordering = ['title']
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
     def perform_create(self, serializer):
         advert = serializer.save(owner=self.request.user)
         AdvertDates.objects.get_or_create(advert=advert)
 
 
-
-
-
-
 class UserAdvertViewSet(viewsets.ModelViewSet):
     serializer_class = AdvertSerializer
     permission_classes = [IsAuthenticated]
-
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = AdvertFilter
     ordering_fields = '__all__'
     ordering = ['title']
-
     def get_queryset(self):
         booked_adverts = BookLogging.objects.filter(user=self.request.user).values_list('advert', flat=True)
         return Advert.objects.filter(id__in=booked_adverts)
-
-
-
-
 
 
 class UserRegistrationView(APIView):
@@ -66,26 +51,18 @@ class UserRegistrationView(APIView):
 #пример запроса: {"username": "newuser", "email": "newuser@example.com", "password": "password123", "password_confirm": "password123"}
 
 
-
-
-
-
 class LoginAPIView(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')
-
         if not email or not password:
             return Response({'error': 'Please provide both email and password'}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = User.objects.get(email=email)
             username = user.username
         except User.DoesNotExist:
             return Response({'error': 'User with this email does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-
         user = authenticate(request, username=username, password=password)
-
         if user is not None:
             login(request, user)
             csrf_token = get_token(request)
@@ -99,10 +76,6 @@ class LoginAPIView(APIView):
 #пример запроса {"email": "user@example.com","password": "yourpassword"}
 
 
-
-
-
-
 class LogoutAPIView(APIView):
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -113,10 +86,6 @@ class LogoutAPIView(APIView):
 #отправляем ПУСТОЙ пост-запрос
 
 
-
-
-
-
 class RatingViewSet(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
@@ -125,20 +94,14 @@ class RatingViewSet(viewsets.ModelViewSet):
     filterset_class = RatingFilter
     ordering_fields = '__all__'
     ordering = ['updated_at']
-
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['request'] = self.request  # Передаем только request
+        context['request'] = self.request
         return context
-
-
-
-
 
 
 class AdvertDatesAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
-
     def get(self, request, *args, **kwargs):
         advert_dates_id = kwargs.get('id')
         try:
@@ -146,11 +109,9 @@ class AdvertDatesAPIView(APIView):
             return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
         except AdvertDates.DoesNotExist:
             return Response({'error': 'AdvertDates not found'}, status=status.HTTP_404_NOT_FOUND)
-
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
-
         advert_dates_id = kwargs.get('id')
         action = request.data.get('action')
         start_date = request.data.get('start_date')
@@ -168,18 +129,14 @@ class AdvertDatesAPIView(APIView):
                         new_dates.append(date_str)
                 advert_dates.dates = ','.join(new_dates)
                 advert_dates.save()
-
                 booking = Booking.objects.create(
                     user=request.user,
                     advert=advert_dates.advert,
                     start_date=start_date_obj,
-                    end_date=end_date_obj
-                )
-
+                    end_date=end_date_obj)
                 BookLogging.objects.get_or_create(
                     user=request.user,
-                    advert=advert_dates.advert
-                )
+                    advert=advert_dates.advert)
                 return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
@@ -190,13 +147,8 @@ class AdvertDatesAPIView(APIView):
 #пример удаления(бронирования) дат {"action": "remove", "start_date": "2024-09-10", "end_date": "2024-09-15"}
 
 
-
-
-
-
 class UserBookingsAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
         user = request.user
         bookings = Booking.objects.filter(user=user)
@@ -204,12 +156,8 @@ class UserBookingsAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
-
 class BookingDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
         booking_id = kwargs.get('id')
         try:
@@ -219,38 +167,28 @@ class BookingDetailAPIView(APIView):
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found or you do not have permission to access it'},
                             status=status.HTTP_404_NOT_FOUND)
-
     def delete(self, request, *args, **kwargs):
         booking_id = kwargs.get('id')
         try:
             booking = Booking.objects.get(id=booking_id, user=request.user)
-
             if booking.confirmation_from_the_owner == 'confirmed':
                 advert_dates = booking.advert.dates
                 start_date = booking.start_date
                 end_date = booking.end_date
-
                 if advert_dates:
                     existing_dates = advert_dates.dates.split(',')
                 else:
                     existing_dates = []
-
                 date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
                 new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
 
                 booking.advert.dates.dates = ','.join(sorted(set(new_dates)))
                 booking.advert.dates.save()
-
             booking.delete()
-
             return Response({'message': 'Booking deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found or you do not have permission to delete it'},
                             status=status.HTTP_404_NOT_FOUND)
-
-
-
-
 
 
 class OwnerBookingListAPIView(APIView):
@@ -262,16 +200,10 @@ class OwnerBookingListAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
-
-
 class OwnerBookingDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
         booking_id = kwargs.get('id')
-
         try:
             booking = Booking.objects.get(id=booking_id, advert__owner=request.user)
             serializer = BookingSerializer(booking)
@@ -279,52 +211,36 @@ class OwnerBookingDetailAPIView(APIView):
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found or you do not have permission to access it'},
                             status=status.HTTP_404_NOT_FOUND)
-
     def patch(self, request, *args, **kwargs):
         booking_id = kwargs.get('id')
         confirmation_status = request.data.get('confirmation_from_the_owner')
-
         if confirmation_status not in ['confirmed', 'denied']:
             return Response({'error': 'Invalid confirmation status'}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             booking = Booking.objects.get(id=booking_id, advert__owner=request.user)
-
             if confirmation_status == 'denied':
                 advert_dates = booking.advert.dates
                 start_date = booking.start_date
                 end_date = booking.end_date
-
                 if advert_dates:
                     existing_dates = advert_dates.dates.split(',')
                 else:
                     existing_dates = []
-
                 date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
                 new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
-
                 booking.advert.dates.dates = ','.join(sorted(set(new_dates)))
                 booking.advert.dates.save()
-
             booking.confirmation_from_the_owner = confirmation_status
             booking.save()
-
             return Response({'message': f'Booking {confirmation_status} successfully'}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found or you do not have permission to modify it'},
                             status=status.HTTP_404_NOT_FOUND)
-
 #пример апи запроса на продверждение или отклонение брони {"confirmation_from_the_owner": "confirmed"  // или "denied"}
-
-
-
-
-
 
 
 class MyRatingsListView(APIView):
     permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
         user = request.user
         ratings = Rating.objects.filter(owner=user)
@@ -332,11 +248,8 @@ class MyRatingsListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-
 class MyRatingDetailView(APIView):
     permission_classes = [IsAuthenticated]
-
     def get(self, request, *args, **kwargs):
         rating_id = kwargs.get('id')
         try:
@@ -346,7 +259,6 @@ class MyRatingDetailView(APIView):
         except Rating.DoesNotExist:
             return Response({'error': 'Rating not found or you do not have permission to access it'},
                             status=status.HTTP_404_NOT_FOUND)
-
     def patch(self, request, *args, **kwargs):
         rating_id = kwargs.get('id')
         try:
@@ -359,7 +271,6 @@ class MyRatingDetailView(APIView):
         except Rating.DoesNotExist:
             return Response({'error': 'Rating not found or you do not have permission to modify it'},
                             status=status.HTTP_404_NOT_FOUND)
-
     def delete(self, request, *args, **kwargs):
         rating_id = kwargs.get('id')
         try:
