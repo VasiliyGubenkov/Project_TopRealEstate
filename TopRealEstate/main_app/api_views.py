@@ -17,13 +17,15 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView
 
 
 class AdvertViewSet(viewsets.ModelViewSet):
-    queryset = Advert.objects.all()
     serializer_class = AdvertSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = AdvertFilter
     ordering_fields = '__all__'
     ordering = ['title']
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    def get_queryset(self):
+        queryset = Advert.objects.filter(is_active=True)
+        return queryset
     def perform_create(self, serializer):
         advert = serializer.save(owner=self.request.user)
         AdvertDates.objects.get_or_create(advert=advert)
