@@ -21,6 +21,7 @@ urlpatterns = [
     path('api/mybookings/<int:id>/', api_views.BookingDetailAPIView.as_view(), name='booking-detail'),
     path('api/myconfirmations/', api_views.OwnerBookingListAPIView.as_view(), name='owner-bookings'),
     path('api/myconfirmations/<int:id>/', api_views.OwnerBookingDetailAPIView.as_view(), name='owner-booking-detail'),
+    path('api/rating/<int:advert_id>/', api_views.AdvertRatingsListAPIView.as_view(), name='advert-ratings'),
     path('api/myratings/', api_views.MyRatingsListView.as_view(), name='my-ratings-list'),
     path('api/myratings/<int:id>/', api_views.MyRatingDetailView.as_view(), name='my-rating-detail'),
     path('api/myadverts/', api_views.MyAdvertsListView.as_view(), name='my-adverts-list'),

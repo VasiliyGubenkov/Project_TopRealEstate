@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from rest_framework import viewsets, status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from .models import Advert, AdvertDates, Booking, BookLogging, Rating
 from .serializers import AdvertSerializer, BookingSerializer, UserRegistrationSerializer, RatingSerializer
 from .permissions import IsOwnerOrReadOnly
@@ -288,3 +288,15 @@ class MyAdvertDetailView(RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
     def get_queryset(self):
         return Advert.objects.filter(owner=self.request.user)
+
+
+class AdvertRatingsListAPIView(ListAPIView):
+    serializer_class = RatingSerializer
+    permission_classes = [AllowAny]
+    def get_queryset(self):
+        advert_id = self.kwargs.get('advert_id')
+        try:
+            advert = Advert.objects.get(id=advert_id)
+        except Advert.DoesNotExist:
+            return Rating.objects.none()
+        return Rating.objects.filter(advert=advert)
