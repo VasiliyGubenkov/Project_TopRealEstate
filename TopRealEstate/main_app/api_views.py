@@ -156,41 +156,6 @@ class UserBookingsAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class BookingDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request, *args, **kwargs):
-        booking_id = kwargs.get('id')
-        try:
-            booking = Booking.objects.get(id=booking_id, user=request.user)
-            serializer = BookingSerializer(booking)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Booking.DoesNotExist:
-            return Response({'error': 'Booking not found or you do not have permission to access it'},
-                            status=status.HTTP_404_NOT_FOUND)
-    def delete(self, request, *args, **kwargs):
-        booking_id = kwargs.get('id')
-        try:
-            booking = Booking.objects.get(id=booking_id, user=request.user)
-            if booking.confirmation_from_the_owner == 'confirmed':
-                advert_dates = booking.advert.dates
-                start_date = booking.start_date
-                end_date = booking.end_date
-                if advert_dates:
-                    existing_dates = advert_dates.dates.split(',')
-                else:
-                    existing_dates = []
-                date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
-                new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
-
-                booking.advert.dates.dates = ','.join(sorted(set(new_dates)))
-                booking.advert.dates.save()
-            booking.delete()
-            return Response({'message': 'Booking deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        except Booking.DoesNotExist:
-            return Response({'error': 'Booking not found or you do not have permission to delete it'},
-                            status=status.HTTP_404_NOT_FOUND)
-
-
 class OwnerBookingListAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
@@ -227,9 +192,10 @@ class OwnerBookingDetailAPIView(APIView):
                 else:
                     existing_dates = []
                 date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
-                new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
-                booking.advert.dates.dates = ','.join(sorted(set(new_dates)))
-                booking.advert.dates.save()
+                date_range_strings = [date.strftime('%Y-%m-%d') for date in date_range]
+                new_dates = sorted(set(existing_dates + date_range_strings))
+                advert_dates.dates = ','.join(new_dates)
+                advert_dates.save()
             booking.confirmation_from_the_owner = confirmation_status
             booking.save()
             return Response({'message': f'Booking {confirmation_status} successfully'}, status=status.HTTP_200_OK)
@@ -281,3 +247,35 @@ class MyRatingDetailView(APIView):
             return Response({'error': 'Rating not found or you do not have permission to delete it'},
                             status=status.HTTP_404_NOT_FOUND)
 #пример изменения рейтинга и содержания отзыва {"rating": 10,"review": "Великолепно!"}
+
+
+class BookingDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        booking_id = kwargs.get('id')
+        try:
+            booking = Booking.objects.get(id=booking_id, user=request.user)
+            serializer = BookingSerializer(booking)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking not found or you do not have permission to access it'},
+                            status=status.HTTP_404_NOT_FOUND)
+    def delete(self, request, *args, **kwargs):
+        booking_id = kwargs.get('id')
+        try:
+            booking = Booking.objects.get(id=booking_id, user=request.user)
+            if booking.confirmation_from_the_owner in [None, 'confirmed', 'Not Confirmed']:
+                advert_dates = booking.advert.dates
+                start_date = booking.start_date
+                end_date = booking.end_date
+                if advert_dates:
+                    existing_dates = advert_dates.dates.split(',')
+                    date_range = [start_date + timedelta(days=x) for x in range((end_date - start_date).days + 1)]
+                    new_dates = existing_dates + [date.strftime('%Y-%m-%d') for date in date_range]
+                    advert_dates.dates = ','.join(sorted(set(new_dates)))
+                    advert_dates.save()
+            booking.delete()
+            return Response({'message': 'Booking deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except Booking.DoesNotExist:
+            return Response({'error': 'Booking not found or you do not have permission to delete it'},
+                            status=status.HTTP_404_NOT_FOUND)
