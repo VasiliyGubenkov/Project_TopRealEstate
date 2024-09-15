@@ -93,7 +93,7 @@ class RatingViewSet(viewsets.ModelViewSet):
 class AdvertDatesAPIView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     def get(self, request, *args, **kwargs):
-        advert_dates_id = kwargs.get('id')
+        advert_dates_id = int(kwargs.get('id')) + int(1)
         try:
             advert_dates = AdvertDates.objects.get(id=advert_dates_id)
             return Response({'dates': advert_dates.dates}, status=status.HTTP_200_OK)
@@ -102,7 +102,7 @@ class AdvertDatesAPIView(APIView):
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return Response({'error': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
-        advert_dates_id = kwargs.get('id')
+        advert_dates_id = int(kwargs.get('id')) + int(1)
         action = request.data.get('action')
         start_date = request.data.get('start_date')
         end_date = request.data.get('end_date')
