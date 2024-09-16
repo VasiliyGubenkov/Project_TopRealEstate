@@ -42,17 +42,17 @@ class RatingSerializer(serializers.ModelSerializer):
         if user and not self.instance:
             self.fields['advert'].queryset = Advert.objects.filter(
                 id__in=BookLogging.objects.filter(user=user).values_list('advert_id', flat=True))
-    def save(self, **kwargs):
-        advert = self.validated_data.get('advert')
+    def create(self, validated_data):
         request = self.context.get('request')
         if request is None:
             raise serializers.ValidationError({"request": "Request context is required but missing"})
         user = request.user
+        advert = validated_data.get('advert')
         if Rating.objects.filter(owner=user, advert=advert).exists():
             raise serializers.ValidationError({"advert": "You have already rated this advert."})
-        instance = super().save(**kwargs)
-        instance.advert.update_average_rating()
-        return instance
+        rating = Rating.objects.create(owner=user, **validated_data)
+        rating.advert.update_average_rating()
+        return rating
 
 
 class BookingSerializer(serializers.ModelSerializer):
