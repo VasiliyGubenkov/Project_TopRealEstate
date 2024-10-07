@@ -1,2 +1,2 @@
 # Project_TopRealEstate
-This is for a project at school 'ICH'
+This project is currently running under the domain name www.app-nn.ru This is a fictional backend for a fictional short-term rental website. The project was created as part of a training course at "IT Career Hub Berlin"
